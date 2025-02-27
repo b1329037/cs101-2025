@@ -15,6 +15,5 @@ int main()
         printf("%d元\n",sum);
     }
 
-
     return 0;
 }
