@@ -1,19 +1,28 @@
 #include <stdio.h>
 
-int main()
-{
-    int i =3101;
-    int additional=i-1500;
-    if (additional<=0){
-        printf("70元\n");
-    } else if (additional<=100){
-        printf("80元\n");
-    }else{
-        int count = addtional /100;
-        int remainder =(additonal%100)?1:0;
-        int sum=(count+remainder)*10+70;
-        printf("%d元\n",sum);
-    }
+void runLengthEncode(char a[]) {
+    int count, i, len = strlen(a);
 
+    for (i = 0; i < len; i++) {
+        count = 1;
+        while (i < len - 1 && a[i] == a[i + 1]) {
+            count++;
+            i++;
+        }
+        
+        while (count > 9) {
+            printf("%c9", a[i]); 
+            count -= 9;          
+        }
+        printf("%c%d", a[i], count); 
+    }
+    printf("\n");
+}
+
+int main() {
+    char a[] = "AABBBCCCCddd";
+    printf("原始字串: %s\n", a);
+    printf("RLE壓縮後: ");
+    runLengthEncode(a);
     return 0;
 }
