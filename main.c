@@ -1,76 +1,82 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
-typedef struct employee{
-    int id;
-    char name[12];
-    int age;
-    float salary;
-}employee_t;
+#define MIN 1
+#define MAX 69
+#define NUM_COUNT 7
 
-void emp_info(employee_t emp){
-    printf("employee id=%d\n",emp.id);
-    printf("employee name=%s\n",emp.name);
-    printf("employee age=%d\n",emp.age);
-    printf("employee salary=%02f\n",emp.salary);
-}
-int emp_aveage_age(employee_t emp[],int n){
-    int sum=0;
-    for(int i=0;i<3;i++){
-        sum+=emp[i].age;
+// 產生一組不重複的樂透號碼
+void generateLottoNumbers(int numbers[]) {
+    int used[MAX + 1] = {0}; // 用於檢查數字是否已被選中
+    int count = 0;
+
+    while (count < NUM_COUNT) {
+        int num = (rand() % MAX) + MIN; // 產生 1 到 69 的數字
+        if (!used[num]) {
+            numbers[count++] = num;
+            used[num] = 1;
+        }
     }
-    return sum/3;
 }
 
-void emp_writefile(employee_t emp[],int n){
-    FILE*fp=fopen("employee.bin","wb+");
-    for(int i=0;i<n;i++){
-        fwrite(&emp[i],sizeof(employee_t),1,fp);
-    }
-    fclose(fp);
-    return;
+// 交換函數，用於排序
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
-void emp_readfile(employee_t emp[]){
-    FILE*fp=fopen("employee.bin","rb");
-    int i=0;
-    while(fread(&emp[i],sizeof(employee_t),1,fp)){
-        printf("[%d] %d %s\n",i,emp[i].id,emp[i].name);
-        i++;
+// 選擇排序對數字排序
+void sortNumbers(int numbers[]) {
+    for (int i = 0; i < NUM_COUNT - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < NUM_COUNT; j++) {
+            if (numbers[j] < numbers[minIdx]) {
+                minIdx = j;
+            }
+        }
+        swap(&numbers[i], &numbers[minIdx]);
     }
-    fclose(fp);
-    return;
-    }
+}
 
-int main()
-{
-    employee_t emp[3];
-    emp[0].id=1;
-    emp[0].age=20;
-    emp[0].salary=30000.0;
-    strcpy(emp[0].name,"IU");
+int main() {
+    int n;
+    time_t t = time(NULL);
+    struct tm *tm_info = localtime(&t);
+    char dateStr[20];
+    strftime(dateStr, sizeof(dateStr), "  %m %d %Y", tm_info);
     
-    emp[1].id=2;
-    emp[1].age=26;
-    emp[1].salary=36000.0;
-    strcpy(emp[1].name,"taylor");
-    
-    emp[2].id=3;
-    emp[2].age=31;
-    emp[2].salary=90000.0;
-    strcpy(emp[2].name,"swift");
-    
-    emp_writefile(emp,3);
-    employee_t read_emp[10];
-    emp_readfile(read_emp);
-    
-    int age=emp_aveage_age(emp,3);
-    printf("Average age: %d\n\n",age);
-    
-    for(int i=0;i<3;i++){
-        emp_info(read_emp[i]);
+    printf("請輸入要購買的樂透組數 (1-5): ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 5) {
+        printf("輸入錯誤，請輸入 1 到 5 之間的數字。\n");
+        return 1;
     }
 
+    FILE *file = fopen("lotto.txt", "w");
+    if (file == NULL) {
+        printf("無法開啟文件。\n");
+        return 1;
+    }
 
+    srand(2025); // 設定隨機種子為 2025
+    fprintf(file, "    %s\n\n", dateStr);
+
+    for (int i = 0; i < n; i++) {
+        int numbers[NUM_COUNT];
+        generateLottoNumbers(numbers);
+        sortNumbers(numbers);
+
+    
+        fprintf(file, "[ %d ]: ", i + 1);
+        for (int j = 0; j < NUM_COUNT; j++) {
+            fprintf(file, "%02d ", numbers[j]);
+        }
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
     return 0;
 }
